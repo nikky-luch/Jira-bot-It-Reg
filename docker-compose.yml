@@ -1,0 +1,29 @@
+﻿version: "3.9"
+
+services:
+  registry-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: it-registry-bot
+    env_file: .env
+    environment:
+      # жёсткие дефолты на случай пустых значений в .env
+      - JIRA_VERIFY_SSL=${JIRA_VERIFY_SSL:-false}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - PORT=${PORT:-8081}
+    ports:
+      - "${PORT:-8081}:8081"
+    restart: unless-stopped
+    extra_hosts:
+      # на Linux обеспечивает доступ к хосту по имени host.docker.internal
+      - "host.docker.internal:host-gateway"
+    # чтобы было проще смотреть трассировки/логи
+    tty: true
+    stdin_open: true
+    # Более «тихий» драйвер логов, чтобы не засыпать консоль
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
